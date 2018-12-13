@@ -5,7 +5,7 @@ a = tf.ones(shape=(2,5), dtype=tf.float32)
 b = tf.ones(shape=(5,2), dtype=tf.float32)
 c = tf.matmul(a, b)
 
-
+## some GPU config ##
 gpu_options = tf.GPUOptions(allow_growth = True)
 with tf.Session(config = tf.ConfigProto(gpu_options = gpu_options, \
 										allow_soft_placement = True, \

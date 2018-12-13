@@ -27,6 +27,9 @@ DW[0]-DB[0]        |  DW[1]-DB[1]          |   DW[2]-DB[2]        |    DW[3]-DB[
 #  DW--delt_W;   DB--delt_B
 ## =========================================== ##
 
+'''
+	手写的网络 及对应的梯度后传的实现 
+'''
 class CMyBPNN:
 	def __init__(self, hidden_nodes_list=[10, 10], batch_size=100, epoch=100, lr=0.5, file_log='./a'):
 		self.train_data = ''
