@@ -18,7 +18,7 @@ num_epochs = 200
 	notice : package == tensorflow.contrib.data 
 '''
 '''
-	Clasee Dataset
+	Clasee Dataset ## dataset 是最方便的数据输入方式 ##
 	A Dataset can be used to represent an input pipeline
 	as a collection of elements(nested structures of tensors),
 	and a "logical plan" of transformations that act on those elements.
@@ -26,7 +26,7 @@ num_epochs = 200
 
 # 1). first must creage a Dataset source; 
 # if you has TFRecord format input-data on disk, 
-#    you can use it : tf.contrib.data.TFRecordDataset
+#    you can use it : tf.contrib.data.TFRecordDataset ## 建议都处理成TR-Record 数据格式 ##
 # elif has some tensors in memory
 #    you can use it : tf.contrib.data.Dataset.from_tensors()/from_tensor_slices()
 # else:
@@ -46,28 +46,32 @@ def My_process_func_outPipe(batch_list):
 file_path  = '../data/MNIST_data_trans_onehot/'
 file_names = [file_path +str(i) for i in os.listdir(file_path)]
 print ('file_names: ', file_names)
+## 1) Dataset
 dataset    = tf.contrib.data.TextLineDataset(file_names)
+## 1.1) Dataset process 
 dataset    = dataset.skip(1) # 跳过第一行 #
 dataset    = dataset.filter(lambda line: tf.not_equal(tf.substr(line, 0,1), '#')) ## 以#开始的行过滤掉 ##
 #dataset    = dataset.filter(lambda line: tf.not_equal(line, []))
 dataset    = dataset.shuffle(buffer_size = 1000)
 dataset    = dataset.batch(batch_size)
-#dataset    = dataset.map(My_process_func_inPipe) # 对每一个元素,进行自己定义的处理 # 还不能特别熟练地掌握 #
+#dataset    = dataset.map(My_process_func_inPipe) # 对每一个元素,进行自己定义的处理 #
 dataset    = dataset.repeat(num_epochs)
-#dataset    =  tf.contrib.data.Dataset.from_tensor_slices(tf.random_uniform([4, 10]))
 print ('dataset.output_types:', dataset.output_types)
 print ('dataset.output_shapes:', dataset.output_shapes)
 
+## 1.2) Dataset Iterator
 iterator   = dataset.make_initializable_iterator() #make_one_shot_iterator()#later not support re-init
-next_sample= iterator.get_next()
+next_sample= iterator.get_next() ## make_one_shot_iterator 是更好用的方法 ##
 
-x  = tf.placeholder(tf.float32, shape=[None, 784], name="x-input")
+## 2) Paras define
+x  = tf.placeholder(tf.float32, shape=[None, 784], name="x-input") ## here using Placeholde Method as input-var ##
 y_ = tf.placeholder(tf.float32, shape=[None, 10], name="y-input")
 W1 = tf.Variable(tf.random_normal([784, 128]))
 W2 = tf.Variable(tf.random_normal([128, 10]))
 b1 = tf.Variable(tf.zeros([128]))
 b2 = tf.Variable(tf.zeros([10]))
 
+## 3) Net-graph 
 y             = tf.nn.softmax(tf.add(tf.matmul(tf.nn.sigmoid(tf.add(tf.matmul(x, W1), b1)), W2),b2))
 cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), reduction_indices=[1]))
 grad_op       = tf.train.GradientDescentOptimizer(learning_rate=0.05)
@@ -78,14 +82,17 @@ accuracy_op        = tf.reduce_mean(tf.cast(correct_prediction, 'float'))
 
 init_op    = tf.global_variables_initializer()
 
+## 4) Session run
 with tf.Session() as sess:
 	sess.run(iterator.initializer)
 	sess.run(init_op)
 	for i in range(num_epochs*60000/batch_size):
 		try: sample = sess.run(next_sample)
 		except tf.errors.OutOfRangeError: break
+		## above OutOfRangeError 是结束 ##
 		train_x, train_y = My_process_func_outPipe(sample)
 		loss, _ = sess.run([cross_entropy, train_op], feed_dict={x: train_x, y_: train_y})
+		## feed_dict 是效率最低的接收数据方式 ## 最好将入口写到图中，最快 ##
 		if i%10 == 0:
 			accuracy = sess.run(accuracy_op, feed_dict={x: train_x, y_: train_y})
 			print ('iter : ', i, 'cross_entropy : ', loss, 'accuracy : ', accuracy)
