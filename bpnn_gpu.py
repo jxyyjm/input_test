@@ -64,7 +64,7 @@ def main(_):
   init_op = tf.global_variables_initializer()
   saver = tf.train.Saver()
   print("Variables initialized ...")
-  gpu_options = tf.GPUOptions(allow_growth = True) # Import === set GPU #
+  gpu_options = tf.GPUOptions(allow_growth = True) # Import === set GPU # 设置自增分配显存 ## 默认使用GPU:0，不显示地指定使用哪个GPU时##
   with tf.Session(config = tf.ConfigProto(gpu_options = gpu_options, allow_soft_placement = True, log_device_placement = True)) as sess:
     sess.run(init_op)
     train_writer = tf.summary.FileWriter("eventLog", sess.graph)      
