@@ -43,11 +43,11 @@ with tf.Session() as sess:
 	sess.run(init_op)
 	print ('random_par: ', sess.run(random_par))
 	print ('zeros_par:  ', sess.run(zeros_par))
-	coord   = tf.train.Coordinator() ## 进程协调器 ##
+	coord   = tf.train.Coordinator() ## 进程协调器 ## 必须要加 ##
 	threads = tf.train.start_queue_runners(coord=coord) ## is important ##
 	for i in range(10):
 		#x, y = sess.run([feature, label])
 		print ('sess.run(parse_record): ', sess.run(parse_record_op))
-
+	## notice: for 循环决定迭代多少次，queue没有自动结束 ##
 	coord.request_stop()
 	coord.join(threads)
